@@ -20,7 +20,7 @@ def get_args():
     parser.add_argument('--bias', default=1e-7, type=float, help='alpha for TRWs, controlling sampling preference with time closeness, default to 0 which is uniform sampling')
     parser.add_argument('--agg', type=str, default='walk', choices=['tree', 'walk'],
                         help='tree based hierarchical aggregation or walk-based flat lstm aggregation')
-    parser.add_argument('--pos_enc', type=str, default='lp', choices=['spd', 'lp', 'saw','concat', 'sum_pooling', 'sum_pooling_after'], help='way to encode distances, shortest-path distance or landing probabilities, or self-based anonymous walk (baseline)')
+    parser.add_argument('--pos_enc', type=str, default='lp', choices=['spd', 'lp', 'saw','concat', 'sum_pooling', 'sum_pooling_after'], help='way to encode distances, shortest-path distance or lp means counting, self-based anonymous walk (baseline), concat, sum_pooling and sum_pooling_after are baselines')
     parser.add_argument('--pos_dim', type=int, default=108, help='dimension of the positional embedding(model dim mod 16 == 0)')
     parser.add_argument('--pos_sample', type=str, default='multinomial', choices=['multinomial', 'binary'], help='two practically different sampling methods that are equivalent in theory ')
     parser.add_argument('--walk_pool', type=str, default='attn', choices=['attn', 'sum'], help='how to pool the encoded walks, using attention or simple sum, if sum will overwrite all the other walk_ arguments')
@@ -54,7 +54,7 @@ def get_args():
     parser.add_argument('--interpretation_type', type=int, default=0, help='Interpretation type: For interpretation, we have 4 tasks. 1: closure vs trianlge; 2: triangle + closure vs wedge; 3: wedge and edge; 4: closure and wedge; Default 0 means no interpretation')
     parser.add_argument('--test_path', type=str, default=None, help='Best model File Path')
     parser.add_argument('--time_prediction', action='store_true', default=False, help='Time prediction task')
-    parser.add_argument('--time_prediction_type', type=int, default=0, help='Interpretation type: For interpretation, we have 3 tasks. 1 for closure; 2 for triangle; 3 for wedge;  Default 0 means no interpretation')
+    parser.add_argument('--time_prediction_type', type=int, default=0, help='Interpretation type: For time_prediction, we have 3 tasks. 1 for closure; 2 for triangle; 3 for wedge;  Default 0 means no time_prediction')
     parser.add_argument('--debug', action='store_true', default=False, help='Time prediction task')
 
 

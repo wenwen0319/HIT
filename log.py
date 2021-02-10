@@ -11,6 +11,8 @@ def set_up_logger(args, sys_argv):
     n_degree = [str(n) for n in n_degree]
     if args.interpretation:
         runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}-inter-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc, args.interpretation_type)
+    elif args.time_prediction:
+        runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}-time-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc, args.time_prediction_type)
     else:
         runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc)
     logging.basicConfig(level=logging.INFO)

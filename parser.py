@@ -3,11 +3,11 @@ import sys
 
 
 def get_args():
-    parser = argparse.ArgumentParser('Interface for Inductive Dynamic Representation Learning for Link Prediction on Temporal Graphs')
+    parser = argparse.ArgumentParser('Neural Predicting Higher-order Patterns in Temporal Networks')
 
     # select dataset and training mode
-    parser.add_argument('-d', '--data', type=str, help='data sources to use, try wikipedia or reddit',
-                        choices=['DAWN', 'tags-ask-ubuntu', 'email-Eu', 'tags-math-sx', 'NDC-substances', 'congress-bills'],
+    parser.add_argument('-d', '--data', type=str, help='data sources to use',
+                        choices=['DAWN', 'tags-ask-ubuntu', 'tags-math-sx', 'NDC-substances', 'congress-bills'],
                         default='tags-math-sx')
     parser.add_argument('-m', '--mode', type=str, default='t', choices=['t', 'i'], help='transductive (t) or inductive (i)')
     parser.add_argument('-nega', '--negative', type=str, default='Nega20', choices=['Nega20', 'NegaWedge', 'rand'], help='negative sampling(last 20%) and randomly choosing(rand)')
@@ -17,13 +17,13 @@ def get_args():
     parser.add_argument('--n_degree', nargs='*', default=['64', '2'],
                         help='a list of neighbor sampling numbers for different hops, when only a single element is input n_layer will be activated')
     parser.add_argument('--n_layer', type=int, default=2, help='number of network layers')
-    parser.add_argument('--bias', default=1e-7, type=float, help='the hyperparameter alpha controlling sampling preference with time closeness, default to 0 which is uniform sampling')
+    parser.add_argument('--bias', default=1e-7, type=float, help='alpha for TRWs, controlling sampling preference with time closeness, default to 0 which is uniform sampling')
     parser.add_argument('--agg', type=str, default='walk', choices=['tree', 'walk'],
                         help='tree based hierarchical aggregation or walk-based flat lstm aggregation')
-    parser.add_argument('--pos_enc', type=str, default='lp', choices=['spd', 'lp', 'saw','sym', 'sum_pooling', 'sum_pooling_after'], help='way to encode distances, shortest-path distance or landing probabilities, or self-based anonymous walk (baseline)')
+    parser.add_argument('--pos_enc', type=str, default='lp', choices=['spd', 'lp', 'saw','concat', 'sum_pooling', 'sum_pooling_after'], help='way to encode distances, shortest-path distance or landing probabilities, or self-based anonymous walk (baseline)')
     parser.add_argument('--pos_dim', type=int, default=108, help='dimension of the positional embedding(model dim mod 16 == 0)')
     parser.add_argument('--pos_sample', type=str, default='multinomial', choices=['multinomial', 'binary'], help='two practically different sampling methods that are equivalent in theory ')
-    parser.add_argument('--walk_pool', type=str, default='sum', choices=['attn', 'sum'], help='how to pool the encoded walks, using attention or simple sum, if sum will overwrite all the other walk_ arguments')
+    parser.add_argument('--walk_pool', type=str, default='attn', choices=['attn', 'sum'], help='how to pool the encoded walks, using attention or simple sum, if sum will overwrite all the other walk_ arguments')
     parser.add_argument('--walk_n_head', type=int, default=8, help="number of heads to use for walk attention")
     parser.add_argument('--walk_mutual', action='store_true', default=False, help="whether to do mutual query for source and target node random walks")
     parser.add_argument('--walk_linear_out', action='store_true', default=False, help="whether to linearly project each node's ")
@@ -51,15 +51,10 @@ def get_args():
     parser.add_argument('--verbosity', type=int, default=1, help='verbosity of the program output')
 
     parser.add_argument('--interpretation', action='store_true', default=False, help='Interpretation or not')
-    parser.add_argument('--interpretation_type', type=int, default=0, help='Interpretation type: For interpretation, we have 4 tasks. 1: class 0 vs class 1; 2: class 0 + class 1 vs class 2; 3: class 2 and class 3; 4: class 0 and class 2; Default 0 means no interpretation')
+    parser.add_argument('--interpretation_type', type=int, default=0, help='Interpretation type: For interpretation, we have 4 tasks. 1: closure vs trianlge; 2: triangle + closure vs wedge; 3: wedge and edge; 4: closure and wedge; Default 0 means no interpretation')
     parser.add_argument('--test_path', type=str, default=None, help='Best model File Path')
-    # parser.add_argument('--test_path', type=str, default='./saved_checkpoints/1610690023.3045893-tags-ask-ubuntu-t-walk-2-64k2-108-lp-inter-1/checkpoint-epoch-4-inter.pth', help='Best model File Path')
     parser.add_argument('--time_prediction', action='store_true', default=False, help='Time prediction task')
-    parser.add_argument('--time_prediction_type', type=int, default=0, help='Interpretation type: For interpretation, we have 3 tasks. 1: class 0; 2: class 1; class 2;  Default 0 means no interpretation')
-    # ./saved_checkpoints/1610215744.8739433-tags-ask-ubuntu-t-walk-2-64k2-108-lp-inter/checkpoint-epoch-5-inter.pth
-    # ./saved_checkpoints/1610336081.2772572-tags-ask-ubuntu-t-walk-2-64k2-108-lp-inter-1/checkpoint-epoch-2-inter.pth
-    # parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-    # parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')\
+    parser.add_argument('--time_prediction_type', type=int, default=0, help='Interpretation type: For interpretation, we have 3 tasks. 1 for closure; 2 for triangle; 3 for wedge;  Default 0 means no interpretation')
     parser.add_argument('--debug', action='store_true', default=False, help='Time prediction task')
 
 

@@ -3,12 +3,10 @@ import numpy as np
 from sklearn.preprocessing import scale
 
 from matplotlib.ticker import FuncFormatter
-# # file_addr = './sx-mathoverflow/'
-# file_name = 'tags-math-sx-times.txt'
-# # file_name = 'tags-stack-overflow'
-# # read node labels
-# f = open(file_name, 'r')
-# # node_max = 24818
+
+"""
+for drawing the figure
+"""
 
 
 # # # def plot_hist(save_img_path, hist_array, bins, xmin, xmax, save_figure_name, figure_title):

@@ -1,5 +1,4 @@
-# HIT
-Neural Predicting Higher-order Patterns in Temporal Networks
+
 
 The dataset can be downloaded from https://www.cs.cornell.edu/~arb/data/
 Unzip the dataset.

@@ -36,3 +36,5 @@ The output will be in the interpretation_output.
 # Note
 
 The code will save all the edges, wedges, triangles, closures in the saved_triplets. So the code doesn't need to run the process again in the future experiments.
+
+You can download the HIT.tar.gz to test the code.

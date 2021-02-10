@@ -17,7 +17,7 @@ def process_pattern(pattern, score, pattern_dict, source=None, topk=5, non_idx=4
     
     # pattern = np.array([1,2,3,1,2,3])
     # score = np.array([[1,2], [1,3], [1,4], [1,2], [1,3], [1,4]])
-    print("check fucked", len(pattern_label[pattern_label == 1]), len(pattern_label[pattern_label == 0]))
+    print("check ", len(pattern_label[pattern_label == 1]), len(pattern_label[pattern_label == 0]))
     pattern = pattern.reshape(-1)
     num_class = score.shape[-1] # usually 4
     # score = score.view(-1, num_class).detach().cpu().numpy() # change score to numpy

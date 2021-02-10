@@ -49,7 +49,7 @@ python main.py -d NDC-substances --time_prediction --time_prediction_type <time_
 ```
 ## Optional arguments
 ```{txt}
-    --time_prediction_type For interpretation, we have 3 tasks. 1: class 0; 2: class 1; class 2;  Default 0 means no time_prediction
+    --time_prediction_type For interpretation, we have 3 tasks. 1: Closure; 2: Triangle; 3: Wedge;  Default 0 means no time_prediction
 ```
 
 The output will be in the ./time_prediction_output/<dataset>_<time_prediction_type>.txt.
@@ -63,7 +63,7 @@ python main.py -d NDC-substances --interpretation --interpretation_type 1
 
 ## Optional arguments
 ```{txt}
-    --interpretation_type: Interpretation type: For interpretation, we have 3 tasks. 1: class 0 vs class 1; 2: class 0 + class 1 vs class 2; 3: class 2 and class 3; Default 0 means no interpretation
+    --interpretation_type: Interpretation type: For interpretation, we have 3 tasks. 1: Closure vs Triangle; 2: Closure + Triangle vs Wedge; 3: Wedge and Edge; Default 0 means no interpretation
 ```
 The output will be in the ./interpretation_output/<dataset>_<interpretation_type>.txt.
 We report all the pattern we sample, with the times of each pattern appears in the first class and the total times it appears in both classes, and their ratio. We also report the mean score and variance of each pattern.

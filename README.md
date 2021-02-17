@@ -8,7 +8,7 @@ pandas==0.24.2
 tqdm==4.41.1
 numpy==1.16.4
 scikit_learn==0.22.1
-<!-- matploblib==3.3.1 -->
+matploblib==3.3.2
 ```
 Refer to `environment.yml` for more details.
 

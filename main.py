@@ -168,8 +168,8 @@ print("Finish build HIT")
 ngh_finders = partial_ngh_finder, full_ngh_finder
 
 # multiprocessing memory setting
-rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (200*args.bs, rlimit[1]))
+# rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+# resource.setrlimit(resource.RLIMIT_NOFILE, (200*args.bs, rlimit[1]))
 
 # model initialization
 device = torch.device('cuda:{}'.format(GPU))

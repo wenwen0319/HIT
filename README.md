@@ -1,7 +1,7 @@
 # HIT
 
 # Requirements
-* `python >= 3.7`, `PyTorch >= 1.4`, please refer to their official websites for installation details.
+* `python = 3.7`, `PyTorch = 1.4`, please refer to their official websites for installation details.
 * Other dependencies:
 ```{bash}
 pandas==0.24.2
@@ -18,6 +18,7 @@ Refer to `environment.yml` for more details.
 
 Preprocess dataset
 ```{bash}
+mkdir processed
 python preprocess.py -d NDC-substances
 ```
 
@@ -27,6 +28,7 @@ This code is to preprocess the dataset, including zero-padding the node features
 First download the dataset, for example https://www.cs.cornell.edu/~arb/data/
 ```{bash}
 unzip dataset.zip
+mkdir processed
 python preprocess.py -d <dataset>
 ```
 

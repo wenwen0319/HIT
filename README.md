@@ -49,6 +49,7 @@ a pattern?
 
 ```{bash}
 export OMP_NUM_THREADS=1
+mkdir time_prediction_output
 python main.py -d tags-ask-ubuntu --time_prediction --time_prediction_type <time_prediction_type>
 ```
 ## Optional arguments
@@ -63,6 +64,7 @@ We report the NLL loss and MSE for training, validating, and testing sets.
 ## For Q3 interpretation
 ```{bash}
 export OMP_NUM_THREADS=1
+mkdir interpretation_output
 python main.py -d tags-ask-ubuntu --interpretation --interpretation_type 1
 ```
 

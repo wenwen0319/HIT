@@ -16,7 +16,7 @@ def get_args():
 
     # select dataset and training mode
     parser.add_argument('-d', '--data', type=str, help='data sources to use, DAWN, tags-ask-ubuntu, tags-math-sx, NDC-substances, congress-bills',
-                        choices=['DAWN', 'tags-ask-ubuntu', 'tags-math-sx', 'NDC-substances', 'congress-bills'],
+                        choices=['DAWN', 'tags-ask-ubuntu', 'tags-math-sx', 'NDC-substances', 'congress-bills', 'threads-ask-ubuntu'],
                         default='tags-math-sx')
 
     try:
@@ -33,7 +33,7 @@ file_name = DATA
 
 fout = open('./processed/ml_' + file_name + '.csv', 'w')
 fout.write(',u,i,ts,label,idx\n')
-file_addr = './' + file_name + '/' + file_name
+file_addr = './data/' + file_name + '/' + file_name
 
 fin_nverts = open(file_addr + '-nverts.txt', 'r')
 fin_simplices = open(file_addr + '-simplices.txt', 'r')
@@ -65,6 +65,10 @@ print("First")
 times = np.array(times)
 y = np.argsort(times) 
 print(y)
+
+nvertsList = np.array(nverts)
+print("Average Size: ", np.mean(nvertsList[nvertsList>1]))
+print("Total size", np.sum(nvertsList), "total hyperedges",len(nvertsList), "total nodes hyperedges > 1",np.sum(nvertsList[nvertsList>1]))
 
 simplices_i = 0
 edge_idx = 0
@@ -109,3 +113,6 @@ rand_feat = np.zeros((count, 172))
 np.save('./processed/ml_'+ file_name + '_node.npy', rand_feat)
 rand_feat = np.zeros((edge_idx, 172))
 np.save('./processed/ml_'+ file_name + '.npy', rand_feat)
+
+print("total nodes ", len(node2idx))
+print("ave link stream intensity ", edge_idx * 1.0 / len(node2idx) / (max(times) - min(times)))

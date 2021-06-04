@@ -7,7 +7,7 @@ import histogram
 from tqdm import tqdm
 
 class EarlyStopMonitor(object):
-    def __init__(self, max_round=3, higher_better=True, tolerance=1e-3):
+    def __init__(self, max_round=5, higher_better=True, tolerance=1e-3):
         self.max_round = max_round
         self.num_round = 0
 
@@ -316,7 +316,7 @@ def find_triangle_closure(ts_list, node_max, edges, adj_list, edges_idx, node_si
     return cls_tri, opn_tri, wedge, nega, set_all_node
 
 class TripletSampler(object):
-    def __init__(self, cls_tri, opn_tri, wedge, nega, ts_start, ts_train, ts_val, ts_end, set_all_nodes, DATA, interpretation_type, time_prediction_type):
+    def __init__(self, cls_tri, opn_tri, wedge, nega, ts_start, ts_train, ts_val, ts_end, set_all_nodes, DATA, interpretation_type=0, time_prediction_type=0, ablation_type=0):
         """
         This is the data loader. 
         In each epoch, it will be re-initialized, since the scale of different samples are too different. 
@@ -328,10 +328,13 @@ class TripletSampler(object):
         self.DATA = DATA
         self.interpretation_type = interpretation_type
         self.time_prediction_type = time_prediction_type
+        self.ablation_type = ablation_type
         if self.interpretation_type > 0:
             self.num_class = 2
         elif self.time_prediction_type > 0:
             self.num_class = 1
+        elif self.ablation_type > 0:
+            self.num_class = 2
         else:
             self.num_class = 4
         self.set_all_nodes = set_all_nodes
@@ -390,7 +393,7 @@ class TripletSampler(object):
             self.size_test = upper_limit_test_val
             print("upper limit for testing", upper_limit_test_val)
         
-        if (self.interpretation_type == 1) or (self.interpretation_type == 2) or (self.interpretation_type == 3) or (self.interpretation_type == 4):
+        if (self.interpretation_type == 1) or (self.interpretation_type == 2) or (self.interpretation_type == 3) or (self.interpretation_type == 4) or (self.ablation_type == 1):
             self.train_label_t = np.concatenate((np.zeros(self.size), np.ones(self.size)))
             self.val_label = np.concatenate((np.zeros(self.size_val), np.ones(self.size_val)))
             self.test_label = np.concatenate((np.zeros(self.size_test), np.ones(self.size_test)))
@@ -451,7 +454,15 @@ class TripletSampler(object):
                 self.train_src_2 = np.concatenate((self.train_src_2_cls_tri[cls_tri_idx_epoch], self.train_src_2_wedge[wedge_idx_epoch]))
                 self.train_dst = np.concatenate((self.train_dst_cls_tri[cls_tri_idx_epoch], self.train_dst_wedge[wedge_idx_epoch]))
                 self.train_ts = np.concatenate((self.train_ts_cls_tri[cls_tri_idx_epoch], self.train_ts_wedge[wedge_idx_epoch]))
-                self.train_idx = np.concatenate((self.train_edge_idx_cls_tri[cls_tri_idx_epoch], self.train_edge_idx_wedge[wedge_idx_epoch]))   
+                self.train_idx = np.concatenate((self.train_edge_idx_cls_tri[cls_tri_idx_epoch], self.train_edge_idx_wedge[wedge_idx_epoch]))
+        elif self.ablation_type == 1:
+            opn_tri_idx_epoch = np.random.choice(len(self.train_src_1_opn_tri), self.size, replace=False)
+            wedge_idx_epoch = np.random.choice(len(self.train_src_1_wedge), self.size, replace=False)
+            self.train_src_1 = np.concatenate((self.train_src_1_opn_tri[opn_tri_idx_epoch], self.train_src_1_wedge[wedge_idx_epoch]))
+            self.train_src_2 = np.concatenate((self.train_src_2_opn_tri[opn_tri_idx_epoch], self.train_src_2_wedge[wedge_idx_epoch]))
+            self.train_dst = np.concatenate((self.train_dst_opn_tri[opn_tri_idx_epoch], self.train_dst_wedge[wedge_idx_epoch]))
+            self.train_ts = np.concatenate((self.train_ts_opn_tri[opn_tri_idx_epoch], self.train_ts_wedge[wedge_idx_epoch]))
+            self.train_idx = np.concatenate((self.train_edge_idx_opn_tri[opn_tri_idx_epoch], self.train_edge_idx_wedge[wedge_idx_epoch]))      
         elif self.time_prediction_type > 0:
             if self.time_prediction_type == 1:
                 cls_tri_idx_epoch = np.random.choice(len(self.train_src_1_cls_tri), self.size, replace=False)
@@ -530,6 +541,15 @@ class TripletSampler(object):
                 self.val_dst = np.concatenate((self.val_dst_cls_tri[cls_tri_idx_epoch], self.val_dst_wedge[wedge_idx_epoch]))
                 self.val_ts = np.concatenate((self.val_ts_cls_tri[cls_tri_idx_epoch], self.val_ts_wedge[wedge_idx_epoch]))
                 self.val_idx = np.concatenate((self.val_edge_idx_cls_tri[cls_tri_idx_epoch], self.val_edge_idx_wedge[wedge_idx_epoch]))
+        elif self.ablation_type == 1: #abla
+            opn_tri_idx_epoch = np.random.choice(len(self.val_src_1_opn_tri), self.size_val, replace=False)
+            wedge_idx_epoch = np.random.choice(len(self.val_src_1_wedge), self.size_val, replace=False)
+
+            self.val_src_1 = np.concatenate((self.val_src_1_opn_tri[opn_tri_idx_epoch], self.val_src_1_wedge[wedge_idx_epoch]))
+            self.val_src_2 = np.concatenate((self.val_src_2_opn_tri[opn_tri_idx_epoch], self.val_src_2_wedge[wedge_idx_epoch]))
+            self.val_dst = np.concatenate((self.val_dst_opn_tri[opn_tri_idx_epoch], self.val_dst_wedge[wedge_idx_epoch]))
+            self.val_ts = np.concatenate((self.val_ts_opn_tri[opn_tri_idx_epoch], self.val_ts_wedge[wedge_idx_epoch]))
+            self.val_idx = np.concatenate((self.val_edge_idx_opn_tri[opn_tri_idx_epoch], self.val_edge_idx_wedge[wedge_idx_epoch]))
         elif self.time_prediction_type > 0:
             if self.time_prediction_type == 1:
                 cls_tri_idx_epoch = np.random.choice(len(self.val_src_1_cls_tri), self.size_val, replace=False)
@@ -609,6 +629,15 @@ class TripletSampler(object):
                 self.test_dst = np.concatenate((self.test_dst_cls_tri[cls_tri_idx_epoch], self.test_dst_wedge[wedge_idx_epoch]))
                 self.test_ts = np.concatenate((self.test_ts_cls_tri[cls_tri_idx_epoch], self.test_ts_wedge[wedge_idx_epoch]))
                 self.test_idx = np.concatenate((self.test_edge_idx_cls_tri[cls_tri_idx_epoch], self.test_edge_idx_wedge[wedge_idx_epoch]))
+        elif self.ablation_type == 1:
+            opn_tri_idx_epoch = np.random.choice(len(self.test_src_1_opn_tri), self.size_test, replace=False)
+            wedge_idx_epoch = np.random.choice(len(self.test_src_1_wedge), self.size_test, replace=False)
+
+            self.test_src_1 = np.concatenate((self.test_src_1_opn_tri[opn_tri_idx_epoch], self.test_src_1_wedge[wedge_idx_epoch]))
+            self.test_src_2 = np.concatenate((self.test_src_2_opn_tri[opn_tri_idx_epoch], self.test_src_2_wedge[wedge_idx_epoch]))
+            self.test_dst = np.concatenate((self.test_dst_opn_tri[opn_tri_idx_epoch], self.test_dst_wedge[wedge_idx_epoch]))
+            self.test_ts = np.concatenate((self.test_ts_opn_tri[opn_tri_idx_epoch], self.test_ts_wedge[wedge_idx_epoch]))
+            self.test_idx = np.concatenate((self.test_edge_idx_opn_tri[opn_tri_idx_epoch], self.test_edge_idx_wedge[wedge_idx_epoch]))
         elif self.time_prediction_type > 0:
             if self.time_prediction_type == 1:
                 cls_tri_idx_epoch = np.random.choice(len(self.test_src_1_cls_tri), self.size_test, replace=False)
@@ -681,6 +710,22 @@ class TripletSampler(object):
             label_cut = self.train_label_t[batch_idx]
         self.idx += 1
         return src_1_l_cut, src_2_l_cut, dst_l_cut, ts_l_cut, e_l_cut, label_cut
+    
+    def train_samples_baselines(self):
+        s_idx = self.idx * self.bs
+        e_idx = min(self.get_size(), s_idx + self.bs)
+        if s_idx == e_idx:
+            s_idx = 0
+            e_idx = self.bs
+            self.idx = 0
+            print("train error")
+        batch_idx = self.train_idx_list[s_idx:e_idx]
+        if self.time_prediction_type > 0:
+            label_cut = self.train_time_gt[batch_idx]
+        else:
+            label_cut = self.train_label_t[batch_idx]
+        self.idx += 1
+        return batch_idx, label_cut
 
     def val_samples(self, bs = None):
         if bs == None:
@@ -701,6 +746,26 @@ class TripletSampler(object):
             label_cut = self.val_label[batch_idx]
         self.idx += 1
         return src_1_l_cut, src_2_l_cut, dst_l_cut, ts_l_cut, e_l_cut, label_cut
+    
+    def val_samples_baselines(self, bs = None):
+        if bs == None:
+            bs = self.bs
+        s_idx = self.idx * bs
+        e_idx = min(self.get_val_size(), s_idx + bs)
+        if s_idx == e_idx:
+            s_idx = 0
+            e_idx = bs
+            self.idx = 0
+            print("val error")
+        
+        batch_idx = self.val_idx_list[s_idx:e_idx]
+        e_l_cut = self.val_idx[batch_idx]
+        if self.time_prediction_type > 0:
+            label_cut = self.val_time_gt[batch_idx]
+        else:
+            label_cut = self.val_label[batch_idx]
+        self.idx += 1
+        return batch_idx, label_cut
 
     def test_samples(self, bs = None):
         if bs == None:
@@ -720,6 +785,26 @@ class TripletSampler(object):
             label_cut = self.test_label[batch_idx]
         self.idx += 1
         return src_1_l_cut, src_2_l_cut, dst_l_cut, ts_l_cut, e_l_cut, label_cut
+    
+    def test_samples_baselines(self, bs = None):
+        if bs == None:
+            bs = self.bs
+        s_idx = self.idx * bs
+        e_idx = min(self.get_test_size(), s_idx + bs)
+        if s_idx == e_idx:
+            s_idx = 0
+            e_idx = bs
+            self.idx = 0
+            print("test error")
+        batch_idx = self.test_idx_list[s_idx:e_idx]
+        e_l_cut = self.test_idx[batch_idx]
+        if self.time_prediction_type > 0:
+            label_cut = self.test_time_gt[batch_idx]
+        else:
+            label_cut = self.test_label[batch_idx]
+        self.idx += 1
+        return batch_idx, label_cut
+
 
     def inter_label(self, label_cut):
         """
@@ -727,6 +812,9 @@ class TripletSampler(object):
         class 0 vs class 1
         class 0 + class 1 vs class 2
         class 2 and class 3
+
+        Abla:
+        class 1 vs class 2
 
         return idx, label_cut
         """
@@ -745,12 +833,18 @@ class TripletSampler(object):
             label_cut[idx_2] = 0
             label_cut[idx_3] = 1
             idx = idx_2 + idx_3
-        elif self.interpretation_type == 3:
+        elif self.interpretation_type == 4:
             idx_1 = label_cut == 0
             idx_3 = label_cut == 2
             label_cut[idx_1] = 0
             label_cut[idx_3] = 1
             idx = idx_1 + idx_3    
+        elif self.ablation_type == 1:
+            idx_2 = label_cut == 1
+            idx_3 = label_cut == 2
+            label_cut[idx_2] = 0
+            label_cut[idx_3] = 1
+            idx = idx_2 + idx_3  
         else: # not interpretation
             idx = np.array(np.ones_like(label_cut), dtype=bool)
         return idx, label_cut

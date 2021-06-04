@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from numba import jit
+# from numba import jit
 import logging
 numba_logger = logging.getLogger('numba')
 numba_logger.setLevel(logging.WARNING)

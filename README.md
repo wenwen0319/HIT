@@ -82,17 +82,14 @@ Finding edges, wedges, triangles, and closures process is in th utils.py. Since 
 
 # Results
 
-Our model's performance(AUC):
+Our model achieves the following performance on :
 
 | Model name         |    tags-math-sx   | tags-ask-ubuntu |   congress-bills   |      DAWN       |  threads-ask-ubuntu  |
 | ------------------ | ----------------- | --------------- | ------------------ |---------------- | -------------------- |
-| HIT                |     77.5Â±0.31     |    81.62Â±0.69   |     81.10Â±0.26     |   76.50Â±0.79    |      86.25Â±0.15      |
-    
+| HIT                |     77.5¡À0.31     |    81.62¡À0.69   |     81.10¡À0.26     |   76.50¡À0.79    |      86.25¡À0.15      |
 
 # Main Code and functions
-
-
-## preprocess.py
+##preprocess.py
 the preprocess of data. Transform the hypergraph to the graph.
 
 ## main.py 
@@ -107,5 +104,5 @@ different modules, including the HIT class, classifiers, self-attention pooling,
 ## utils.py
 functions, including early stopper, ROC score function, preprocess the dataset, finding patterns and Dataset class.
 
-## parser.py
+##parser.py
 parsers

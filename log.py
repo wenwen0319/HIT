@@ -9,12 +9,18 @@ def set_up_logger(args, sys_argv):
     # set up running log
     n_degree, n_layer = process_sampling_numbers(args.n_degree, args.n_layer)
     n_degree = [str(n) for n in n_degree]
-    if args.interpretation:
+    if (args.test_baselines) and (args.time_prediction):
+        runtime_id = '{}-{}-{}-baselines-time-{}'.format(str(time.time()), args.data, args.model, args.time_prediction_type)
+    elif (args.test_baselines) and (not args.time_prediction):
+        runtime_id = '{}-{}-{}-baselines'.format(str(time.time()), args.data, args.model)
+    elif args.ablation:
+        runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}-abla-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc, args.ablation_type)
+    elif args.interpretation:
         runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}-inter-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc, args.interpretation_type)
     elif args.time_prediction:
         runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}-time-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc, args.time_prediction_type)
     else:
-        runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc)
+        runtime_id = '{}-{}-{}-{}-{}-{}-{}-{}-{}'.format(str(time.time()), args.data, args.mode[0], args.agg, n_layer, 'k'.join(n_degree), args.pos_dim, args.pos_enc, args.bias)
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)

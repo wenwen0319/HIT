@@ -10,6 +10,7 @@ from graph import NeighborFinder
 import resource
 from sklearn.preprocessing import scale
 from histogram import plot_hist
+import time
 
 args, sys_argv = get_args()
 
@@ -41,6 +42,8 @@ interpretation = args.interpretation
 interpretation_type = args.interpretation_type
 time_prediction = args.time_prediction
 time_prediction_type = args.time_prediction_type
+ablation = args.ablation
+ablation_type = args.ablation_type
 WALK_POOL = args.walk_pool
 walk_linear_out = args.walk_linear_out
 test_path = args.test_path
@@ -56,9 +59,15 @@ if args.debug == False:
         POS_ENC = 'spd'
         walk_linear_out = True
         WALK_POOL = 'sum'
-        best_model_path = './interpretation_output/{}_{}.pth'.format(DATA, interpretation_type)
-        fout = open('./interpretation_output/{}_{}.txt'.format(DATA, interpretation_type), 'w')
+        best_model_path = './interpretation_output/{}_{}_{}.pth'.format(str(time.time()), DATA, interpretation_type)
+        fout = open('./interpretation_output/{}_{}_{}.txt'.format(str(time.time()), DATA, interpretation_type), 'w')
         sys.stdout = fout
+    elif ablation:
+        print("Ablation study: wedge and open triangle")
+        # best_model_path = './ablation_output/{}_{}.pth'.format(DATA, ablation_type)
+        # fout = open('./interpretation_output/{}_{}.txt'.format(DATA, interpretation_type), 'w')
+        # POS_ENC = 'lp'
+        # sys.stdout = fout
     elif time_prediction:
         print("Time prediction used lp")
         """
@@ -66,8 +75,8 @@ if args.debug == False:
         Since delta may be 1, thus log 1 becomes 0, eventually lead to nan.
         """
         POS_ENC = 'lp'
-        best_model_path = './time_prediction_output/{}_{}.pth'.format(DATA, time_prediction_type)
-        fout = open('./time_prediction_output/{}_{}.txt'.format(DATA, time_prediction_type), 'w')
+        best_model_path = './time_prediction_output/{}_{}_{}.pth'.format(str(time.time()), DATA, time_prediction_type)
+        fout = open('./time_prediction_output/{}_{}_{}.txt'.format(str(time.time()), DATA, time_prediction_type), 'w')
         sys.stdout = fout
 
 # Load data and sanity check
@@ -107,7 +116,7 @@ print(n_feat.shape[0], max_idx, np.unique(np.stack([src_l, dst_l])).shape[0])
 assert(np.unique(np.stack([src_l, dst_l])).shape[0] == max_idx)  # all nodes except node 0 should appear and be compactly indexed
 assert(n_feat.shape[0] == max_idx + 1)  # the nodes need to map one-to-one to the node feat matrix
 
-
+import pickle
 
 # find possitive and negative triplet
 if DATA == 'tags-math-sx':
@@ -119,21 +128,53 @@ else:
 file_path = './saved_triplets/'+DATA+'/'+DATA+'_'+str(time_start_factor)+'_'+str(time_window_factor)
 test = 0
 if os.path.exists(file_path) and (test==0):
-    with open(file_path+'/triplets.npy', 'rb') as f:
-        x = np.load(f, allow_pickle=True)
-        cls_tri, opn_tri, wedge, nega, set_all_nodes = x[0], x[1], x[2], x[3], x[4]
-        print("close tri", len(cls_tri[0]))
-        print("open tri", len(opn_tri[0]))
-        print("wedge", len(wedge[0]))
-        print("nega", len(nega[0]))
+    if DATA == 'threads_ask_ubuntu':
+        with open(file_path+'/triplets.npy', 'rb') as f: 
+            x = pickle.load(f)
+    else:
+        with open(file_path+'/triplets.npy', 'rb') as f:
+            x = np.load(f, allow_pickle=True)
+
+    cls_tri, opn_tri, wedge, nega, set_all_nodes = x[0], x[1], x[2], x[3], x[4]
+    print("close tri", len(cls_tri[0]))
+    print("open tri", len(opn_tri[0]))
+    print("wedge", len(wedge[0]))
+    print("nega", len(nega[0]))
+
 else:
     cls_tri, opn_tri, wedge, nega, set_all_nodes = preprocess_dataset(ts_list=ts_l, src_list=src_l, dst_list=dst_l, node_max=max_idx, edge_idx_list=e_idx_l, 
                                                                       label_list=label_l, time_window_factor=time_window_factor, time_start_factor=time_start_factor)
     if not(os.path.exists(file_path)):
         os.makedirs(file_path)
-    with open(file_path+'/triplets.npy', 'wb') as f:
-        x = np.array([cls_tri, opn_tri, wedge, nega, set_all_nodes])
-        np.save(f, x)
+    if DATA == 'threads_ask_ubuntu': # reason is that it's too big > 4G, so we can't directly save them using numpy.save
+        # in addition, since too many nega(edge in our paper), we can cut part of them
+        print("cut threads_ask_ubuntu since too many nega 6 Trillion. We only choose 6M.")
+        idx = np.array(range(6000000)) * 1000 # TODO: check the code here, if it doesn't work, please check cut_dataset.py . That should work
+        nega_new = [nega[0][idx], nega[1][idx], nega[2][idx], nega[3][idx], nega[4][idx]]
+        with open(file_path+'/triplets.npy', 'wb') as f: # TODO: if we cut here, then no need to use pickle
+            x = np.array([cls_tri, opn_tri, wedge, nega, set_all_nodes])
+            print(pickle.HIGHEST_PROTOCOL)
+            pickle.dump(x, f, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        with open(file_path+'/triplets.npy', 'wb') as f:
+            x = np.array([cls_tri, opn_tri, wedge, nega, set_all_nodes])
+            np.save(f, x)
+    # with open(file_path+'/triplets_cls.npy', 'wb') as f:
+    #     x = np.array(cls_tri)
+    #     np.save(f, x)
+    # with open(file_path+'/triplets_opn.npy', 'wb') as f:
+    #     x = np.array(opn_tri)
+    #     np.save(f, x)
+    # with open(file_path+'/triplets_wedge.npy', 'wb') as f:
+    #     x = np.array(wedge)
+    #     np.save(f, x)
+    # with open(file_path+'/triplets_nega.npy', 'wb') as f:
+    #     x = np.array(nega)
+    #     np.save(f, x)
+    # with open(file_path+'/triplets_set_all_nodes.npy', 'wb') as f:
+    #     x = np.array(set_all_nodes)
+    #     np.save(f, x)
+    
 
 # triangle closure
 # randomly choose 70% as training, 15% as validating, 15% as testing
@@ -177,11 +218,13 @@ hit = HIT(n_feat, e_feat, agg=AGG,
           num_layers=NUM_LAYER, use_time=USE_TIME, attn_agg_method=ATTN_AGG_METHOD, attn_mode=ATTN_MODE,
           n_head=ATTN_NUM_HEADS, drop_out=DROP_OUT, pos_dim=POS_DIM, pos_enc=POS_ENC, walk_pool=WALK_POOL, 
           num_neighbors=NUM_NEIGHBORS, walk_n_head=WALK_N_HEAD, walk_mutual=WALK_MUTUAL, walk_linear_out=walk_linear_out,
-          cpu_cores=CPU_CORES, verbosity=VERBOSITY, get_checkpoint_path=get_checkpoint_path, interpretation=interpretation, interpretation_type=interpretation_type, time_prediction=time_prediction)
+          cpu_cores=CPU_CORES, verbosity=VERBOSITY, get_checkpoint_path=get_checkpoint_path, interpretation=interpretation, 
+          interpretation_type=interpretation_type, time_prediction=time_prediction, ablation=ablation, ablation_type=ablation_type)
 hit.to(device)
 
 # dataset initialization
-dataset = TripletSampler(cls_tri, opn_tri, wedge, nega, ts_start, ts_train, ts_val, ts_end, set_all_nodes, DATA, interpretation_type, time_prediction_type=time_prediction_type)
+dataset = TripletSampler(cls_tri, opn_tri, wedge, nega, ts_start, ts_train, ts_val, ts_end, set_all_nodes, DATA, 
+                         interpretation_type, time_prediction_type=time_prediction_type, ablation_type=ablation_type)
 
 logger.info(interpretation and (not os.path.exists(best_model_path)))
 

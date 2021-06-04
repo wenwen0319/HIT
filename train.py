@@ -24,7 +24,7 @@ def train_val(dataset, model, mode, bs, epochs, criterion, optimizer, early_stop
     logger.info('num of training instances: {}'.format(num_instance))
     logger.info('num of batches per epoch: {}'.format(num_batch))
     model.test = False
-    NLL_total = None
+    
 
     if interpretation:
         roc_auc_score = utils.roc_auc_score_single
@@ -37,6 +37,7 @@ def train_val(dataset, model, mode, bs, epochs, criterion, optimizer, early_stop
         dataset.reset()
         acc, ap, f1, auc, m_loss = [], [], [], [], []
         logger.info('start {} epoch'.format(epoch))
+        NLL_total = None
         
         y_true, y_pred, y_one_hot_np = None, None, None
 

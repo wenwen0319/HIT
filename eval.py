@@ -47,7 +47,7 @@ def eval_one_epoch(hint, model, dataset, val_flag='val', interpretation=False, t
         loop_num = num_test_batch
         for k in tqdm(range(loop_num)):
             src_1_l_cut, src_2_l_cut, dst_l_cut, ts_l_cut, e_l_cut, true_label = get_sample()
-            if interpretation:
+            if (interpretation):
                 pred_score, pattern_score = model.contrast(src_1_l_cut, src_2_l_cut, dst_l_cut, ts_l_cut, e_l_cut)
                 # interpretation
                 src_1_walks_score, src_2_walks_score, tgt_walks_score, src_1_walk_pattern, src_2_walk_pattern, tgt_walk_pattern = pattern_score
@@ -134,3 +134,4 @@ def eval_one_epoch(hint, model, dataset, val_flag='val', interpretation=False, t
         val_auc = roc_auc_score(y_one_hot_np, y_score)
 
         return np.mean(val_acc), np.mean(val_ap), None, val_auc, cm
+        

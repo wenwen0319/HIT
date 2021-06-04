@@ -8,7 +8,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from transformer import TransformerEncoderLayer, TransformerDecoderLayer
 from utils import *
 from position import *
-from numba import jit
+# from numba import jit
 PRECISION = 5
 POS_DIM_ALTER = 100
 
@@ -339,6 +339,7 @@ class EmptyEncode(torch.nn.Module):
     def __init__(self, expand_dim):
         super().__init__()
         self.expand_dim = expand_dim
+        self.time_dim = expand_dim
 
     def forward(self, ts):
         out = torch.zeros_like(ts).float()
@@ -476,7 +477,8 @@ class HIT(torch.nn.Module):
                  attn_mode='prod', use_time='time', attn_agg_method='attn',
                  pos_dim=0, pos_enc='spd', walk_pool='attn', walk_n_head=8, walk_mutual=False,
                  num_layers=3, n_head=4, drop_out=0.1, num_neighbors=20, cpu_cores=1,
-                 verbosity=1, get_checkpoint_path=None, walk_linear_out=False, interpretation=False, interpretation_type=0, time_prediction=True):
+                 verbosity=1, get_checkpoint_path=None, walk_linear_out=False, interpretation=False, 
+                 interpretation_type=0, time_prediction=True, ablation=False, ablation_type=0):
         super(HIT, self).__init__()
         self.logger = logging.getLogger(__name__)
         self.verbosity = verbosity
@@ -493,12 +495,16 @@ class HIT(torch.nn.Module):
         # self.num_class = 4
         self.interpretation_type = interpretation_type
         self.time_prediction = time_prediction
+        self.ablation_type = ablation_type
+        self.ablation = ablation
         print("inter type", interpretation_type)
         # if (interpretation_type == 1) or (interpretation_type == 2) or (interpretation_type == 3) or (interpretation_type == 4):
         if interpretation:
             self.num_class = 2
         elif time_prediction:
             self.num_class = 1
+        elif ablation:
+            self.num_class = 2
         else:
             self.num_class = 4
         print("num_class ", self.num_class)
@@ -534,9 +540,11 @@ class HIT(torch.nn.Module):
         self.node_raw_embed = torch.nn.Embedding.from_pretrained(self.n_feat_th, padding_idx=0, freeze=True)
         self.time_encoder = self.init_time_encoder(use_time, seq_len=self.num_neighbors[0])
         if self.pos_dim > 12:
+            print('use DE')
             self.position_encoder = PositionEncoder(enc_dim=self.pos_dim, num_layers=self.num_layers, ngh_finder=self.ngh_finder,
                                                     cpu_cores=cpu_cores, verbosity=verbosity, logger=self.logger, enc=self.pos_enc)
-
+        else:
+            print('not using DE')
         # attention model
         if self.agg == 'tree':
             self.attn_model_list = self.init_attn_model_list(attn_agg_method, attn_mode, n_head, drop_out)
@@ -548,12 +556,15 @@ class HIT(torch.nn.Module):
         # # final projection layer
         # self.affinity_score = finalClassifier(self.feat_dim, self.feat_dim, self.feat_dim, self.feat_dim, 4) # cls_tri, opn_tri, wedge, neg
         # final projection layer
-        if interpretation:
+        if (interpretation):
             self.interpretation = True
             self.affinity_score = finalClassifier_inter(self.feat_dim, self.feat_dim, self.feat_dim, self.feat_dim, self.num_class)
         elif time_prediction:
             self.interpretation = False
             self.affinity_score = finalClassifier_time_prediction(self.feat_dim, self.feat_dim, self.feat_dim, self.feat_dim, self.num_class)
+        elif ablation:
+            self.interpretation = False
+            self.affinity_score = finalClassifier(self.feat_dim, self.feat_dim, self.feat_dim, self.feat_dim, self.num_class) # cls_tri, opn_tri, wedge, neg
         else:
             self.interpretation = False
             self.affinity_score = finalClassifier(self.feat_dim, self.feat_dim, self.feat_dim, self.feat_dim, self.num_class) # cls_tri, opn_tri, wedge, neg
@@ -653,6 +664,9 @@ class HIT(torch.nn.Module):
         elif self.time_prediction:
             score = self.affinity_score(src_embed_1, src_embed_2, tgt_embed, time_gt) 
             return score, None
+        elif self.ablation:
+            score = self.affinity_score(src_embed_1, src_embed_2, tgt_embed) # .squeeze(dim=-1) # score_walk shape: [B, M]
+            return score, None
         else:
             score = self.affinity_score(src_embed_1, src_embed_2, tgt_embed) # .squeeze(dim=-1) # score_walk shape: [B, M]
             return score, None
@@ -690,6 +704,8 @@ class HIT(torch.nn.Module):
         # 3. get edge features for all in-between hops
         # 4. iterate over hidden embeddings for each layer
         hidden_embeddings, masks = self.init_hidden_embeddings(src_idx_l, node_records)  # length self.num_layers+1
+        # only for testing
+        # masks = torch.ones_like(masks) * 3
         time_features = self.retrieve_time_features(cut_time_l, t_records)  # length self.num_layers+1
         edge_features = self.retrieve_edge_features(eidx_records)  # length self.num_layers
         if self.pos_dim > 12:

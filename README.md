@@ -19,7 +19,7 @@ Refer to `environment.yml` for more details.
 Preprocess dataset
 ```{bash}
 mkdir processed
-python preprocess.py -d NDC-substances
+python preprocess.py -d tags-ask-ubuntu
 ```
 
 This code is to preprocess the dataset, including zero-padding the node features and edge features.
@@ -37,7 +37,8 @@ After preprocessing the dataset, we can run the code for three different questio
 The task aims to solve the Q1 in the paper. What type of high-order interaction will most likely appear among 𝑢, 𝑣, 𝑤 within (𝑡, 𝑡 + 𝑇_𝑤]?
 
 ```{bash}
-python main.py -d NDC-substances
+export OMP_NUM_THREADS=1
+python main.py -d tags-ask-ubuntu
 ```
 
 The output will be in the log file. We will both report the AUC and the confusion matrix.
@@ -47,7 +48,8 @@ The task aims to solve the Q2 in the paper. For a triplet ({𝑢, 𝑣 },𝑤, �
 a pattern?
 
 ```{bash}
-python main.py -d NDC-substances --time_prediction --time_prediction_type <time_prediction_type>
+export OMP_NUM_THREADS=1
+python main.py -d tags-ask-ubuntu --time_prediction --time_prediction_type <time_prediction_type>
 ```
 ## Optional arguments
 ```{txt}
@@ -60,7 +62,8 @@ We report the NLL loss and MSE for training, validating, and testing sets.
 
 ## For Q3 interpretation
 ```{bash}
-python main.py -d NDC-substances --interpretation --interpretation_type 1
+export OMP_NUM_THREADS=1
+python main.py -d tags-ask-ubuntu --interpretation --interpretation_type 1
 ```
 
 ## Optional arguments
@@ -74,3 +77,13 @@ We report all the pattern we sample, with the times of each pattern appears in t
 # Note
 
 Finding edges, wedges, triangles, and closures process is in th utils.py. Since the finding process is time-consuming, the code will automatically save all the edges, wedges, triangles, closures in the saved_triplets. So the code doesn't need to run the process again in the future experiments.
+
+# Results
+
+Our model's performance(AUC):
+
+| Model name         |    tags-math-sx   | tags-ask-ubuntu |   congress-bills   |      DAWN       |  threads-ask-ubuntu  |
+| ------------------ | ----------------- | --------------- | ------------------ |---------------- | -------------------- |
+| HIT                |     77.5±0.31     |    81.62±0.69   |     81.10±0.26     |   76.50±0.79    |      86.25±0.15      |
+    
+    

@@ -86,7 +86,7 @@ Our model achieves the following performance on :
 
 | Model name         |    tags-math-sx   | tags-ask-ubuntu |   congress-bills   |      DAWN       |  threads-ask-ubuntu  |
 | ------------------ | ----------------- | --------------- | ------------------ |---------------- | -------------------- |
-| HIT                |     77.5¡À0.31    |   81.62¡À0.69   |     81.10¡À0.26    |   76.50¡À0.79   |      86.25¡À0.15     |
+| HIT                |     77.5$\pm$ 0.31    |   81.62 $\pm$ 0.69   |     81.10 $\pm$ 0.26    |   76.50 $\pm$ 0.79   |      86.25 $\pm$ 0.15     |
 
 # Main Code and functions
 ##preprocess.py

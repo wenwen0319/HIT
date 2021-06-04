@@ -88,9 +88,11 @@ Our model's performance(AUC):
 | ------------------ | ----------------- | --------------- | ------------------ |---------------- | -------------------- |
 | HIT                |     77.5±0.31     |    81.62±0.69   |     81.10±0.26     |   76.50±0.79    |      86.25±0.15      |
     
+
 # Main Code and functions
-    
-##preprocess.py
+
+
+## preprocess.py
 the preprocess of data. Transform the hypergraph to the graph.
 
 ## main.py 
@@ -105,5 +107,5 @@ different modules, including the HIT class, classifiers, self-attention pooling,
 ## utils.py
 functions, including early stopper, ROC score function, preprocess the dataset, finding patterns and Dataset class.
 
-##parser.py
+## parser.py
 parsers

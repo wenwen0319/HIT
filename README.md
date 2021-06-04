@@ -88,7 +88,7 @@ Our model achieves the following performance on :
 | ------------------ | ----------------- | --------------- | ------------------ |---------------- | -------------------- |
 | HIT                |     77.05 ± 0.31    |   81.62 ± 0.69   |     81.10 ± 0.26    |   76.50 ± 0.79   |      86.25 ± 0.15     |
 
-# Main Code and Functions
+# Main code and functions
     
 ## preprocess.py
 the preprocess of data. Transform the hypergraph to the graph.
